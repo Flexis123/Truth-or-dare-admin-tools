@@ -1,0 +1,9 @@
+
+BASE_URL = "http://127.0.0.1:8080"
+TOKEN_HEADER = None
+USER_HEADER = None
+ADMIN = None
+MAX_PAGE_LENGTH_MOD = None
+MAX_PAGES_LENGTH_TOD = None
+auth_body = None
+
