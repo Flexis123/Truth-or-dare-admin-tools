@@ -68,7 +68,7 @@ class ListFrame(Frame):
 
     @property
     def titles(self):
-        return self._columns.keys()
+        return list(self._columns.keys())
 
     @property
     def max_size(self):
@@ -182,28 +182,26 @@ class AddRecordsFrame(ABC, ListFrame):
 
 
 class EditRecordsFrame(PaginatedListFrame):
-    def __init__(self, master, titles: List[str], max_size=None):
-        super().__init__(master, titles, max_size)
+    def __init__(self, master: PaginatedListFrame):
+        super().__init__(master, master.titles, master.max_size)
+        self.master = master
 
         self.__edit_frame = Frame(self)
         self._build_edit_frame(self.__edit_frame)
         self.__edit_frame.pack(side=BOTTOM)
 
-    def __on_record_click(self):
-        self._on_record_click(self.selected)
+    def _fetch_elements(self, page) -> list:
+        return self.master._fetch_elements(page)
 
     @abstractmethod
     def _build_edit_frame(self, frame: Frame):
         pass
 
-    @abstractmethod
-    def _on_record_click(self, record):
-        pass
-
 
 class PaginatedActionListFrame(PaginatedListFrame):
     def __init__(self, master, max_size, titles: List[str], delete_action=True,
-                 add_records_frame: Type[AddRecordsFrame] = None, ):
+                 add_records_frame: Type[AddRecordsFrame] = None,
+                 edit_records_frame: Type[EditRecordsFrame] = None):
 
         PaginatedListFrame.__init__(self, master, titles, max_size)
 
@@ -219,22 +217,25 @@ class PaginatedActionListFrame(PaginatedListFrame):
 
         if add_records_frame is not None:
             self.__add_records_frame = add_records_frame
-            self.addRecordsButton = Button(actionButtonFrame, text="add records",
-                                           command=self.__open_add_frame)
+            self.__addRecordsButton = Button(actionButtonFrame, text="add records",
+                                           command=lambda: self.__open_frame(add_records_frame))
 
-            self.addRecordsButton.grid(row=0, column=1)
+            self.__addRecordsButton.grid(row=0, column=1)
 
-    def __open_add_frame(self):
-        self.master.master.open_frame(self.add_records_frame)
+        if edit_records_frame:
+            self.__edit_records_frame = edit_records_frame
+            self.__edit_records_btn = Button(actionButtonFrame, text="edit records",
+                                             command=lambda: self.__open_frame(edit_records_frame))
+
+            self.__edit_records_btn.grid(row=1)
+
+    def __open_frame(self, frame):
+        self.master.master.open_frame(frame)
 
     @ui_confirmatiom
     def __remove_rows(self):
         objs = self._do_for_each_row_selected(lambda col, i: col.delete(i))
         self._remove_records(objs)
-
-    @property
-    def add_records_frame(self):
-        return self.__add_records_frame
 
     def _remove_records(self, objs: list):
         pass

@@ -24,6 +24,7 @@ class ModeratorAddFrame(AddRecordsFrame):
         mod.add_new_moderators([m['username'] for m in self.all])
 
 
+
 class ModeratorListFrame(PaginatedActionListFrame):
     def __init__(self, master):
         super().__init__(master,  constants.MAX_PAGE_LENGTH_MOD,[
